@@ -312,7 +312,7 @@ def initial_mass_with_Tcrit_and_z(z, T_crit):
 
 def evaporation_time_from_mass(M_bh):
     """
-    Function that returns the evaporation time [in years] of a 
+    Function that returns the evaporation time [in Gyears] of a 
     black hole as a function of its mass [Mo].
     
     Parameters
@@ -321,13 +321,29 @@ def evaporation_time_from_mass(M_bh):
     """
     
     evaporation_const = c_SB*hbar**4*c**8/(256*pi**3*k**4*G**2)
-    return c**2*(M_s*M_bh)**3/(3*evaporation_const*YEARS_2_SEC)
+    return c**2*(M_s*M_bh)**3/(3*evaporation_const*YEARS_2_SEC)/1e9
 
+
+def mass_from_evaporation_time(t_evap):
+    """
+    Function that takes the evaporation time [in Gyears] and  
+    returns the black hole mass [Mo] that would evaporate by then.
+    
+    Parameters
+    ----------
+    t_evap : evaporation time [Gyr]
+    """
+    
+    evaporation_const = c_SB*hbar**4*c**8/(256*pi**3*k**4*G**2)
+    
+    M_bh = (t_evap/(c**2/(3*evaporation_const*YEARS_2_SEC)/1e9))**(1/3)/M_s
+    
+    return M_bh
 
 
 def effective_evaporation_time_from_mass(M_bh):
     """
-    Function that returns the evaporation time [in years] of a 
+    Function that returns the evaporation time [in Gyears] of a 
     black hole as a function of its mass [Mo].
     
     Parameters
@@ -335,6 +351,7 @@ def effective_evaporation_time_from_mass(M_bh):
     M_bh : black hole mass [Mo]
     """
     
+    ## If BH mass in grams is smaller than 1e18
     if M_bh*M_s <= 1e18:
         c1 = -0.3015
         c2 = 0.3113
@@ -345,7 +362,7 @@ def effective_evaporation_time_from_mass(M_bh):
         a_eff = 1/(15360*np.pi)
     
     evaporation_const = G**2/(3*a_eff*c**4*hbar)
-    return evaporation_const*(M_s*M_bh)**3/YEARS_2_SEC
+    return evaporation_const*(M_s*M_bh)**3/YEARS_2_SEC/1e9
 
 
 
