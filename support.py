@@ -47,7 +47,7 @@ def check_greybody_factor(M_bh, E_eV):
 
 def age_at_redshift(z):
     """
-    Function that calculates the age of the Universe in Gyears
+    Function that calculates the age of the Universe in Gyrs
     for a given redshift
     
     Example: z=0 will give the age of the Universe today.
@@ -95,8 +95,22 @@ def Hawking_temperature_from_mass(M_bh, units='solar'):
     return T_HR
 
 
+def BH_mass_from_Hawking_temperature(T_HR, units='solar'):
+    """
+    Returns BH mass [in Mo, or gr] for Hawking temperature in K.
+    """
+    
+    if units == 'solar':
+        M_bh = hbar*c**3/(8*pi*k*G*T_HR*M_s)
+    elif units == 'cgs':
+        # For BH masses in grams
+        M_bh = hbar*c**3/(8*pi*k*G*(1/M_SOLAR_2_GRAMS)*M_s*T_HR)
+    
+    return M_bh
 
-def Spectrum_freq_temperature(nu, Temp):
+
+
+def Spectrum_freq_temperature(nu, Temp, f_eff = 1):
     """
     Blackbody spectrum with frequency for a given temperature
     
@@ -113,11 +127,11 @@ def Spectrum_freq_temperature(nu, Temp):
     """
     
     exp_denominator = np.exp(h*nu/(k*Temp))-1
-    return 2*h*nu**3/(c**2*exp_denominator)
+    return f_eff*2*h*nu**3/(c**2*exp_denominator)
 
 
 
-def Spectrum_freq_mass(nu, Mbh, units='solar'):
+def Spectrum_freq_mass(nu, Mbh, units='solar', f_eff=1):
     """
     Blackbody spectrum with frequency for a given BH mass.
     
@@ -135,16 +149,17 @@ def Spectrum_freq_mass(nu, Mbh, units='solar'):
     Temp = Hawking_temperature_from_mass(Mbh, units)
     
     exp_denominator = np.exp(h*nu/(k*Temp))-1
-    return 2*h*nu**3/(c**2*exp_denominator)
+    return f_eff*2*h*nu**3/(c**2*exp_denominator)
 
 
 
 
 def Greybody_spectrum_freq_mass(nu, Mbh, units='solar'):
     """
+    ### WORK IN PROGRESS ###
+    
     Blackbody spectrum with frequency for a given temperature
-    
-    
+        
     Parameters
     ----------
     nu : frequency [Hz]
@@ -167,9 +182,8 @@ def Greybody_spectrum_freq_mass(nu, Mbh, units='solar'):
 
 
 
-def total_blackbody_spectrum(v, list_of_masses):
+def total_blackbody_spectrum(v, list_of_masses, units='solar', f_eff=1):
     """
-    
     This function takes a list of masses and calculates the total HR blackbody spectrum.
     
     Parameters:
@@ -180,16 +194,14 @@ def total_blackbody_spectrum(v, list_of_masses):
     list_of_masses [Solar masses]
     """
     
-    # First, a "holder variable" is called so we can collect all the contributions
-    
+    ## First, a "holder variable" is called so we can collect all the contributions
     total_spectrum = 0
     
-    # Then, we need to loop through all the masses in list_of_masses
-    
+    ## Then, we need to loop through all the masses in list_of_masses
     for mass in list_of_masses:
         # To calculate each the blackbody spectrum of each individual mass, we can just 
         # call the function mass_blackbody_spectrum (we which defined previously).
-        total_spectrum += Spectrum_freq_mass(v, mass)
+        total_spectrum += Spectrum_freq_mass(v, mass, units=units, f_eff=f_eff)
         
     return total_spectrum
 
@@ -198,7 +210,6 @@ def total_blackbody_spectrum(v, list_of_masses):
 def energy_from_photons(nu = None, wavelength=None):
     """
     Function that returns energy in [eV] for provided frequency or wavelength.
-    
     
     Parameters
     ----------
@@ -222,7 +233,7 @@ def energy_from_photons(nu = None, wavelength=None):
 
 def photons_from_energy(E_eV):
     """
-    Function that return frequency [Hz] and wavelength [nm], 
+    Function that returns frequency [Hz] and wavelength [nm], 
     for given energy in [eV].
     
     Parameters
@@ -250,7 +261,7 @@ def peak_HR_energy_from_mass(Mbh):
     
     T_HR = Hawking_temperature_from_mass(Mbh)
     
-    # Stefan-Boltzmann law (different b when using frequency/wavelength)
+    # Wien's law (different b when using frequency/wavelength)
     freq_peak = b_wien_freq*T_HR
     
     energy_peak = energy_from_photons(nu=freq_peak)
