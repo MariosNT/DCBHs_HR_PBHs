@@ -323,6 +323,47 @@ def evaporation_time_from_mass(M_bh):
     evaporation_const = c_SB*hbar**4*c**8/(256*pi**3*k**4*G**2)
     return c**2*(M_s*M_bh)**3/(3*evaporation_const*YEARS_2_SEC)/1e9
 
+def evaporation_redshift_from_mass(M_bh):
+    """
+    Function that returns the evaporation redshift of a 
+    black hole as a function of its mass [Mo].
+    
+    Parameters
+    ----------
+    M_bh : black hole mass [Mo]
+    """
+    
+    evaporation_const = c_SB*hbar**4*c**8/(256*pi**3*k**4*G**2)
+    
+    ## Evaporation time [Gyr]
+    t_evap = c**2*(M_s*M_bh)**3/(3*evaporation_const*YEARS_2_SEC)/1e9
+    
+    ## Get redshift, assuming cosmology
+    z_evap = z_at_value(cosmo.age, t_evap * u.Gyr, zmin=0, zmax=1e8).value
+    
+    return z_evap
+
+
+def mass_evolution_half_time(M_bh):
+    """
+    Function that returns the half-time time [in Gyears] for
+    a BH of initial mass Mi [Mo] to evolve to Mi.
+    
+    Parameters
+    ----------
+    M_bh : black hole mass [Mo]
+    """
+    
+    ## C in notes, in [kg^3/s]
+    evaporation_const = 3*c_SB*hbar**4*c**6/(256*pi**3*k**4*G**2)
+    
+    ## transform to [Mo^3/Gyr]
+    evaporation_const *= YEARS_2_SEC*1e9/M_s**3
+    
+    t_half_const = 7/8/evaporation_const
+    
+    return t_half_const*M_bh**3
+
 
 def mass_from_evaporation_time(t_evap):
     """
@@ -339,6 +380,9 @@ def mass_from_evaporation_time(t_evap):
     M_bh = (t_evap/(c**2/(3*evaporation_const*YEARS_2_SEC)/1e9))**(1/3)/M_s
     
     return M_bh
+
+
+
 
 
 def effective_evaporation_time_from_mass(M_bh):
