@@ -43,7 +43,7 @@ cosmo = FlatLambdaCDM(H0=HUBBLE_CONST, Om0=OMEGA_M)
 # Unit conversions
 M_SOLAR_2_GRAMS = 1.989e33   # Multiply to make grams from Mo
 E_JOULE_2_eV = 6.242e18      # Divide to make eV to Joules
-YEARS_2_SEC = 3.15*10**7     # Multiply to make sec from year
+YEARS_2_SEC = 3.15*1e7     # Multiply to make sec from year
 KM_2_MPC = 3.24e-20 
 HUBBLE_TIME = HUBBLE_CONST*KM_2_MPC*YEARS_2_SEC #### CAREFUL --> this could be wrong
 J_CRIT_2_SI = 1e-3           # Multiply the cgs value to get the SI value

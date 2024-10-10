@@ -382,9 +382,6 @@ def mass_from_evaporation_time(t_evap):
     return M_bh
 
 
-
-
-
 def effective_evaporation_time_from_mass(M_bh):
     """
     Function that returns the evaporation time [in Gyears] of a 
@@ -429,18 +426,20 @@ def mass_evolution_from_HR(M_bh, t0, t, mass_units='solar', time_units='redshift
     M_evolved : evolved BH mass [in Mo]
     """
     
-    evaporation_constant = c_SB*hbar**4*c**6/(256*pi**3*k**4*G**2)*YEARS_2_SEC
-    evaporation_constant /= 1e-9  # Transform to 1/Gyrs
+    ## Evaporation constant in SI
+    evaporation_constant = 3*c_SB*hbar**4*c**6/(256*pi**3*k**4*G**2)
        
+    ## Time difference in SI
     if time_units == 'redshift':
         t_init = age_at_redshift(t0)
         t_final = age_at_redshift(t)
-        delta_t = t_final - t_init
+        delta_t = (t_final - t_init)*1e9*YEARS_2_SEC
     elif time_units == 'Gyrs':
-        delta_t = t - t0
+        delta_t = (t - t0)*1e9*YEARS_2_SEC
     else:
         print("Wrong time units!")
         
+    ## Masses in SI
     if mass_units == 'solar':
         M_initial = M_bh*M_s
     elif mass_units == 'cgs':
@@ -448,19 +447,47 @@ def mass_evolution_from_HR(M_bh, t0, t, mass_units='solar', time_units='redshift
     else:
         print("Wrong mass units!")
             
-    M_evolved_cubed = M_initial**3 - 3*evaporation_constant*delta_t
+    M_evolved_cubed = M_initial**3 - evaporation_constant*delta_t
+    
     if M_evolved_cubed < 0:
         M_evolved = 0
     else:
         M_evolved = M_evolved_cubed**(1/3)
     
+    ## Return evolved BH mass in Mo
     return M_evolved/M_s
 
 
 
-###########################
-### PBHs Mass Functions ###
-###########################
+########################################
+### PBHs Mass Functions  & Formation ###
+########################################
+
+
+def formation_mass_at_time(t_form):
+    """
+    Function that gives an estimate of the PBH mass [Mo]
+    at formation time (at specific t_age).
+    
+    Parameters
+    ----------
+    t_form : time at formation (Gyr)
+    
+    Returns
+    -------
+    M_bh : PBH mass at formation (Mo)
+    """
+    
+    factor = 1e15
+    time_scale = t_form*1e9*YEARS_2_SEC/1e-23
+    
+    M_bh = factor*time_scale  # Mass in gr
+    
+    M_bh /= M_SOLAR_2_GRAMS
+    
+    return M_bh
+
+
 
 
 def lognormal_PBH_mass_function(mass, Mc, sigma):
