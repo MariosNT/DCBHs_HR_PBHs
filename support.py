@@ -288,17 +288,36 @@ def initial_mass_with_Tcrit_and_z(z, T_crit):
     """
     Function that returns the initial mass value that would have
     a critical HR temperature at a given redshift.
+    
+    Parameters
+    ----------
+    T_crit : critical temperature
+    
+    z : redshift of interest
+    
+    Returns
+    -------
+    initial_mass : initial BH mass [in Mo]    
     """
     
+    ## Temperature evolution 
     C_temperature = hbar*c**3/(8*pi*k*G)
+    ## This has units of mass, so we need to rescale
+    T_ratio = C_temperature/T_crit/M_s
     
-    evaporation_constant = c_SB*hbar**4*c**6/(256*pi**3*k**4*G**2)*YEARS_2_SEC
-    evaporation_constant /= 1e-9
-    C_time = 3*evaporation_constant
-    
+    ## Mass evolution
     time_at_redshift = age_at_redshift(z)
+
+    ## C in notes, in [kg^3/s]
+    evaporation_const = 3*c_SB*hbar**4*c**6/(256*pi**3*k**4*G**2)
+    ## transform to [Mo^3/Gyr]
+    evaporation_const *= YEARS_2_SEC*1e9/M_s**3
     
-    initial_mass = (C_time*time_at_redshift+(C_temperature/T_crit)**3)**(1/3)
+    ## Time evolution
+    time_factor = time_at_redshift*evaporation_const
+    
+    ## Initial mass at [Mo]
+    initial_mass = (time_factor + T_ratio**3)**(1/3)
     
     return initial_mass
     
@@ -322,6 +341,7 @@ def evaporation_time_from_mass(M_bh):
     
     evaporation_const = c_SB*hbar**4*c**8/(256*pi**3*k**4*G**2)
     return c**2*(M_s*M_bh)**3/(3*evaporation_const*YEARS_2_SEC)/1e9
+
 
 def evaporation_redshift_from_mass(M_bh):
     """
@@ -376,6 +396,25 @@ def mass_from_evaporation_time(t_evap):
     """
     
     evaporation_const = c_SB*hbar**4*c**8/(256*pi**3*k**4*G**2)
+    
+    M_bh = (t_evap/(c**2/(3*evaporation_const*YEARS_2_SEC)/1e9))**(1/3)/M_s
+    
+    return M_bh
+
+
+
+def mass_from_evaporation_redshift(z_evap):
+    """
+    Function that takes the evaporation redshift and  
+    returns the black hole mass [Mo] that would evaporate by then.
+    
+    Parameters
+    ----------
+    t_evap : evaporation time [Gyr]
+    """
+    
+    evaporation_const = c_SB*hbar**4*c**8/(256*pi**3*k**4*G**2)
+    t_evap = age_at_redshift(z_evap)
     
     M_bh = (t_evap/(c**2/(3*evaporation_const*YEARS_2_SEC)/1e9))**(1/3)/M_s
     
