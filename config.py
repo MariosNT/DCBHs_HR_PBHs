@@ -32,7 +32,7 @@ G = const.G  # Newton gravitational constant
 M_s = 1.99 * 10**30  # Solar mass 
 c_SB = const.Stefan_Boltzmann  # Stefan-Boltzmann constant
 b_wien_freq = 0.05878925757646824946e12  # Wien's proportionality constant [Hz/K]
-
+mass_electron = const.electron_mass
 
 # Cosmological model
 HUBBLE_CONST = 70
@@ -42,8 +42,9 @@ cosmo = FlatLambdaCDM(H0=HUBBLE_CONST, Om0=OMEGA_M)
 
 # Unit conversions
 M_SOLAR_2_GRAMS = 1.989e33   # Multiply to make grams from Mo
-E_JOULE_2_eV = 6.242e18      # Divide to make eV to Joules
-YEARS_2_SEC = 3.15*1e7     # Multiply to make sec from year
+E_JOULE_2_eV = 6.242e18      # Multiply to make eV from Joules
+YEARS_2_SEC = 3.15*1e7       # Multiply to make sec from year
 KM_2_MPC = 3.24e-20 
 HUBBLE_TIME = HUBBLE_CONST*KM_2_MPC*YEARS_2_SEC  # In 1/years
 J_CRIT_2_SI = 1e-3           # Multiply the cgs value to get the SI value
+PARSEC_2_M = 3.1e16          # Multiply to make meters from pc

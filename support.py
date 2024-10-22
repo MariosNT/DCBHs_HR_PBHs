@@ -76,6 +76,54 @@ def theoretical_lum(Radius, Temp):
 
 
 
+##############################
+### Cosmological functions ###
+##############################
+
+def H(z):
+    """
+    Hubble function
+    """
+    return np.sqrt(HUBBLE_CONST**2*(OMEGA_M*(1+z)**3+(1-OMEGA_M)))
+
+
+def Omega_m_redshift(z):
+    num = OMEGA_M*(1+z)**3
+    denom = OMEGA_M*(1+z)**3+(1-OMEGA_M)
+    
+    return num/denom
+
+
+def Delta_c(z):
+    """
+    Matter overdensity in haloes
+    """
+    
+    y = Omega_m_redshift(z)-1
+    
+    return 18*pi**2+82*y-39*y**2
+
+
+def virial_radius(z, Mvir):
+    """
+    Calculate virial radius [in units of m].
+    
+    Mvir = halo mass [in Mo]
+    """
+    
+    
+    Mvir_SI = Mvir*M_s
+    
+    num = 2*G*Mvir_SI
+    
+    denom = Delta_c(z)*(H(z)*KM_2_MPC)**2  # To make it in SI units
+    
+    rvir = (num/denom)**(1/3)
+    
+    return rvir
+
+
+
 #######################################
 ### Hawking Temperature and Spectra ###
 ####################################### 
