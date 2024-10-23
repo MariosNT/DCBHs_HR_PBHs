@@ -45,21 +45,6 @@ def check_greybody_factor(M_bh, E_eV):
 
 
 
-def age_at_redshift(z):
-    """
-    Function that calculates the age of the Universe in Gyrs
-    for a given redshift
-    
-    Example: z=0 will give the age of the Universe today.
-    """
-    
-    factor = (1/HUBBLE_TIME)*(2/(3*np.sqrt(1-OMEGA_M)))
-    argument = (np.sqrt((1-OMEGA_M)*(1+z)**(-3))+np.sqrt((1-OMEGA_M)*(1+z)**(-3)+OMEGA_M))/np.sqrt(OMEGA_M)
-    
-    return factor*np.log(argument)/1e9
-
-
-
 def theoretical_lum(Radius, Temp):
     """
     This function returns the luminosity of a black 
@@ -79,6 +64,21 @@ def theoretical_lum(Radius, Temp):
 ##############################
 ### Cosmological functions ###
 ##############################
+
+
+def age_at_redshift(z):
+    """
+    Function that calculates the age of the Universe in Gyrs
+    for a given redshift
+    
+    Example: z=0 will give the age of the Universe today.
+    """
+    
+    factor = (1/HUBBLE_TIME)*(2/(3*np.sqrt(1-OMEGA_M)))
+    argument = (np.sqrt((1-OMEGA_M)*(1+z)**(-3))+np.sqrt((1-OMEGA_M)*(1+z)**(-3)+OMEGA_M))/np.sqrt(OMEGA_M)
+    
+    return factor*np.log(argument)/1e9
+
 
 def H(z):
     """
@@ -111,7 +111,6 @@ def virial_radius(z, Mvir):
     Mvir = halo mass [in Mo]
     """
     
-    
     Mvir_SI = Mvir*M_s
     
     num = 2*G*Mvir_SI
@@ -121,6 +120,16 @@ def virial_radius(z, Mvir):
     rvir = (num/denom)**(1/3)
     
     return rvir
+
+
+def virial_density(z):
+    """
+    Calculate virial density [in units of kg/m^3].
+    """    
+    
+    rho_crit = 2*(H(z)*KM_2_MPC)**2/(8*pi*G)
+    
+    return rho_crit*Delta_c(z)
 
 
 
@@ -673,3 +682,104 @@ def crit_collapse_PBH_mass_function(mass, M_f, alpha):
     exponent = -(mass/M_f)**alpha
     
     return fraction*np.exp(exponent)
+
+
+
+###########################################
+### LW radiation and critical intensity ###
+###########################################
+
+
+def J_LW_single_BH(distance, Mbh, E_eV=12.5, units='solar', f_eff=1):
+    """
+    LW specific intensity for a single BH at distance d.
+    
+    Parameters
+    ----------
+    distance : distance from the BH [pc]
+    
+    Mbh : BH mass [Mo]
+    
+    E_eV : energy of the photons of interest [eV]
+    
+    Returns
+    -------
+    J_LW_21_cgs : specific intensity in normalised units (J_21) in cgs
+    """
+    
+    B_LW = Spectrum_freq_mass(photons_from_energy(E_eV)[0], Mbh, units, f_eff)
+    R_S = Schwarzschild_radius(Mbh)
+    
+    J_LW_21 = B_LW/4*(R_S/(distance*PARSEC_2_M))**2*1e21  # This is in SI units
+    
+    # Transforming to cgs
+    J_LW_21_cgs = J_LW_21/J_CRIT_2_SI
+    
+    return J_LW_21_cgs
+
+
+
+def J_LW_BH_density_factor(Mbh, rho, E_eV=12.5, units='solar', f_eff=1):
+    """
+    LW specific intensity factor for the cases with a BH density.
+    See sections 4.3.2 & 4.3.3 of the paper.
+    
+    Parameters
+    ----------
+    rho : density of the halo (at rvir) [kg/m^3]
+    
+    Mbh : BH mass [Mo]
+    
+    E_eV : energy of the photons of interest [eV]
+    
+    Returns
+    -------
+    J_LW_21_factor_cgs : J_LW factor (not units of specific intensity) in normalised units (J_21) in SI
+    """    
+    
+    B_LW = Spectrum_freq_mass(photons_from_energy(E_eV)[0], Mbh, units, f_eff)
+    R_S = Schwarzschild_radius(Mbh)
+    
+    # Calculating the numerator
+    J_LW_21_factor = B_LW*R_S**2*1e21
+    
+    # adding the constribution from density and mass
+    J_LW_21_factor *= rho/(Mbh*M_s)
+       
+    return J_LW_21_factor
+
+
+def J_LW_critical_density(Mass_halo, Mbh, z, rmin, factor=1, method='isothermal'):
+    """
+    Toral specific intensity for 
+    
+    Parameters
+    ----------
+    Mass_halo : Halo mass [Mo]
+       
+    Mbh : BH mass [Mo]
+    
+    z : redshift
+    
+    rmin : minimum radius of PBHs distribution [in pc]
+    
+    Returns
+    -------
+    J_21 : Critical intensity at the centre of the halo, in normalised units
+    """    
+    
+    # Virial radius
+    rvir = virial_radius(z, Mass_halo)/PARSEC_2_M  #to make radius in units of parsec
+    
+    # Virial density - density of the halo (at rvir) [kg/m^3]
+    rho_vir = virial_density(z)*factor
+    
+    # Base J21 factor
+    J_base = J_LW_BH_density_factor(Mbh, rho_vir)
+    
+    if method == 'isothermal':
+        J_21 = J_base*(rvir*PARSEC_2_M)*(rvir/rmin-1)/J_CRIT_2_SI  # To transform to cgs
+    elif method == 'uniform':
+        J_21 = J_base*(rmin*PARSEC_2_M)*(rvir/rmin-1)/J_CRIT_2_SI
+        
+    return J_21
