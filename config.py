@@ -4,6 +4,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import matplotlib as mpl
 mpl.rcParams.update({'font.size': 16,'font.family':'serif'})
 mpl.rc('text', usetex=True)

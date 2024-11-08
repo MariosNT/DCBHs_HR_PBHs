@@ -26,25 +26,6 @@ def Schwarzschild_radius(M_bh):
 
 
 
-def check_greybody_factor(M_bh, E_eV):
-    """
-    Function that checks if `greybody` factors need to
-    be taken into account when calculating the spectrum
-    of a BH
-    """
-    
-    E_J = E_eV/E_JOULE_2_eV
-    
-    factor_check = h*c**3/(2*G*E_J)
-    
-    M_kg = M_bh*M_s
-    
-    bool_greybody = (M_kg >= factor_check)
-    
-    return bool_greybody
-
-
-
 def theoretical_lum(Radius, Temp):
     """
     This function returns the luminosity of a black 
@@ -167,7 +148,7 @@ def BH_mass_from_Hawking_temperature(T_HR, units='solar'):
 
 
 
-def Spectrum_freq_temperature(nu, Temp, f_eff = 1):
+def Spectrum_freq_temperature(nu, Temp, f_eff = 0.2):
     """
     Blackbody spectrum with frequency for a given temperature
     
@@ -188,7 +169,7 @@ def Spectrum_freq_temperature(nu, Temp, f_eff = 1):
 
 
 
-def Spectrum_freq_mass(nu, Mbh, units='solar', f_eff=1):
+def Spectrum_freq_mass(nu, Mbh, units='solar', f_eff=0.2, f_grey=0.24):
     """
     Blackbody spectrum with frequency for a given BH mass.
     
@@ -206,40 +187,12 @@ def Spectrum_freq_mass(nu, Mbh, units='solar', f_eff=1):
     Temp = Hawking_temperature_from_mass(Mbh, units)
     
     exp_denominator = np.exp(h*nu/(k*Temp))-1
-    return f_eff*2*h*nu**3/(c**2*exp_denominator)
+    return f_grey*f_eff*2*h*nu**3/(c**2*exp_denominator)
 
 
 
 
-def Greybody_spectrum_freq_mass(nu, Mbh, units='solar'):
-    """
-    ### WORK IN PROGRESS ###
-    
-    Blackbody spectrum with frequency for a given temperature
-        
-    Parameters
-    ----------
-    nu : frequency [Hz]
-    
-    Temp : temperature [K]
-    
-    Returns
-    -------
-    Blackbody spectrum
-    """
-    
-    A_surface = 16*np.pi*G**2*Mbh**2/c**4
-    
-    Grey_factor = 4/9*A_surface/np.pi*Mbh**2*nu**4
-    
-    Temp = Hawking_temperature_from_mass(Mbh, units)
-    
-    exp_denominator = np.exp(h*nu/(k*Temp))-1
-    return Grey_factor*2*h*nu**3/(c**2*exp_denominator)
-
-
-
-def total_blackbody_spectrum(v, list_of_masses, units='solar', f_eff=1):
+def total_blackbody_spectrum(v, list_of_masses, units='solar', f_eff=0.2, f_grey=0.24):
     """
     This function takes a list of masses and calculates the total HR blackbody spectrum.
     
@@ -258,7 +211,7 @@ def total_blackbody_spectrum(v, list_of_masses, units='solar', f_eff=1):
     for mass in list_of_masses:
         # To calculate each the blackbody spectrum of each individual mass, we can just 
         # call the function mass_blackbody_spectrum (we which defined previously).
-        total_spectrum += Spectrum_freq_mass(v, mass, units=units, f_eff=f_eff)
+        total_spectrum += Spectrum_freq_mass(v, mass, units=units, f_eff=f_eff, f_grey=f_grey)
         
     return total_spectrum
 
@@ -690,7 +643,7 @@ def crit_collapse_PBH_mass_function(mass, M_f, alpha):
 ###########################################
 
 
-def J_LW_single_BH(distance, Mbh, E_eV=12.5, units='solar', f_eff=1):
+def J_LW_single_BH(distance, Mbh, E_eV=12.5, units='solar', f_eff=0.2, f_grey=0.24):
     """
     LW specific intensity for a single BH at distance d.
     
@@ -707,7 +660,7 @@ def J_LW_single_BH(distance, Mbh, E_eV=12.5, units='solar', f_eff=1):
     J_LW_21_cgs : specific intensity in normalised units (J_21) in cgs
     """
     
-    B_LW = Spectrum_freq_mass(photons_from_energy(E_eV)[0], Mbh, units, f_eff)
+    B_LW = Spectrum_freq_mass(photons_from_energy(E_eV)[0], Mbh, units, f_eff, f_grey)
     R_S = Schwarzschild_radius(Mbh)
     
     J_LW_21 = B_LW/4*(R_S/(distance*PARSEC_2_M))**2*1e21  # This is in SI units
@@ -719,7 +672,7 @@ def J_LW_single_BH(distance, Mbh, E_eV=12.5, units='solar', f_eff=1):
 
 
 
-def J_LW_BH_density_factor(Mbh, rho, E_eV=12.5, units='solar', f_eff=1):
+def J_LW_BH_density_factor(Mbh, rho, E_eV=12.5, units='solar', f_eff=0.2, f_grey=0.24):
     """
     LW specific intensity factor for the cases with a BH density.
     See sections 4.3.2 & 4.3.3 of the paper.
@@ -737,7 +690,7 @@ def J_LW_BH_density_factor(Mbh, rho, E_eV=12.5, units='solar', f_eff=1):
     J_LW_21_factor_cgs : J_LW factor (not units of specific intensity) in normalised units (J_21) in SI
     """    
     
-    B_LW = Spectrum_freq_mass(photons_from_energy(E_eV)[0], Mbh, units, f_eff)
+    B_LW = Spectrum_freq_mass(photons_from_energy(E_eV)[0], Mbh, units, f_eff, f_grey)
     R_S = Schwarzschild_radius(Mbh)
     
     # Calculating the numerator
@@ -783,3 +736,24 @@ def J_LW_critical_density(Mass_halo, Mbh, z, rmin, factor=1, method='isothermal'
         J_21 = J_base*(rmin*PARSEC_2_M)*(rvir/rmin-1)/J_CRIT_2_SI
         
     return J_21
+
+
+def LW_Bv_RS(Mbh, E_eV=12.5, units='solar', f_eff=0.2, f_grey=0.24):
+    """
+    BvRs factor for LW specific intensity for a single BH.
+    
+    Parameters
+    ----------    
+    Mbh : BH mass [Mo]
+    
+    E_eV : energy of the photons of interest [eV]
+    
+    Returns
+    -------
+    BvRs : the specific intensity x Schwarzschild radius factor [SI units]
+    """
+    
+    B_LW = Spectrum_freq_mass(photons_from_energy(E_eV)[0], Mbh, units, f_eff, f_grey)
+    R_S = Schwarzschild_radius(Mbh)
+    
+    return B_LW*R_S**2
