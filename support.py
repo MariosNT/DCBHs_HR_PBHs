@@ -757,3 +757,15 @@ def LW_Bv_RS(Mbh, E_eV=12.5, units='solar', f_eff=0.2, f_grey=0.24):
     R_S = Schwarzschild_radius(Mbh)
     
     return B_LW*R_S**2
+
+
+def LW_background(Mbh, z, E_eV=12.5, units='solar', f_eff=0.2, f_grey=0.24, f_PBH=1, f_z=1.04):
+    
+    BH_term = c*LW_Bv_RS(Mbh, E_eV, units, f_eff, f_grey)/(Mbh*M_SOLAR_2_GRAMS)
+    
+    J_crit_norm = 1e21/J_CRIT_2_SI
+    
+    cosmo_term = 3*HUBBLE_CONST**2/(8*G)*f_PBH*OMEGA_M*(1+z)**3*(f_z-1)/H(z)
+    cosmo_term *= KM_2_MPC
+    
+    return BH_term*cosmo_term*J_crit_norm
