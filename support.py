@@ -642,6 +642,25 @@ def crit_collapse_PBH_mass_function(mass, M_f, alpha):
 ### LW radiation and critical intensity ###
 ###########################################
 
+def J_crit_k_ratio(k_ratio):
+    """
+    LW critical specific intensity as a function of the ratio kH-/kH2,
+    which is a function of temperature.
+    
+    Based on Eq. (26)-(28) in [1407.4039]
+    """
+    
+    a1 = -0.19
+    a2 = -0.12
+    
+    x = np.log10(k_ratio) - 2
+    
+    J_crit = 1400*10**(a1*x+a2*x**2)
+    J_crit[x<=0] = 1400
+    
+    return J_crit
+
+
 
 def J_LW_single_BH(distance, Mbh, E_eV=12.5, units='solar', f_eff=0.2, f_grey=0.24):
     """
@@ -697,7 +716,7 @@ def J_LW_BH_density_factor(Mbh, rho, E_eV=12.5, units='solar', f_eff=0.2, f_grey
     J_LW_21_factor = B_LW*R_S**2*1e21
     
     # adding the constribution from density and mass
-    J_LW_21_factor *= rho/(Mbh*M_s)
+    J_LW_21_factor *= np.pi*rho/(Mbh*M_s)
        
     return J_LW_21_factor
 

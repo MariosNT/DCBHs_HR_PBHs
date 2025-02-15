@@ -126,24 +126,24 @@ plt.axhspan(1, 1.5, facecolor='grey', alpha=0.5, zorder=10)
 
 
 ## z_evap constraints
-plt.annotate('', xy=(Msun_max, 1e-5),
-             xycoords='data',
-             xytext=(Msun_min, 1e-5),
-             textcoords='data',
-             arrowprops=dict(arrowstyle= '->',
-                             color='tab:green',
-                             lw=2,
-                             ls='--')
+# plt.annotate('', xy=(Msun_max, 1e-5),
+#              xycoords='data',
+#              xytext=(Msun_min, 1e-5),
+#              textcoords='data',
+#              arrowprops=dict(arrowstyle= '->',
+#                              color='tab:green',
+#                              lw=2,
+#                              ls='--')
              
-           )
-plt.text(1e-6, 1.2e-5, r'$z_{\rm evap}$ constraints', fontsize=12)
+#            )
+# plt.text(1e-6, 1.2e-5, r'$z_{\rm evap}$ constraints', fontsize=12)
 
 
 ## T_crit constraints
-plt.axvline(x=6.16e-12, ls='-', lw=2, c='tab:green')
+plt.axvline(x=7.5e-12, ls='-', lw=2, c='tab:green')
 plt.annotate('', xy=(Msun_min, 1.6e-5),
              xycoords='data',
-             xytext=(6.16e-12, 1.6e-5),
+             xytext=(7.5e-12, 1.6e-5),
              textcoords='data',
              arrowprops=dict(arrowstyle= '->',
                              color='tab:green',
@@ -151,14 +151,14 @@ plt.annotate('', xy=(Msun_min, 1.6e-5),
                              ls='--')
              
            )
-plt.text(2e-16, 2e-5, r'$T_{\rm crit}$ constraints', fontsize=12)
+plt.text(2e-17, 2e-5, r'$T_{\rm crit}$ constraints', fontsize=12)
 
 
 ## X-ray constraints
-plt.axvline(x=6e-14, ls='-', lw=2, c='tab:green')
+plt.axvline(x=4e-13, ls='-', lw=2, c='tab:green')
 plt.annotate('', xy=(Msun_max, 1e-4),
              xycoords='data',
-             xytext=(6e-14, 1e-4),
+             xytext=(4e-13, 1e-4),
              textcoords='data',
              arrowprops=dict(arrowstyle= '->',
                              color='tab:green',
