@@ -721,7 +721,7 @@ def J_LW_BH_density_factor(Mbh, rho, E_eV=12.5, units='solar', f_eff=0.2, f_grey
     return J_LW_21_factor
 
 
-def J_LW_critical_density(Mass_halo, Mbh, z, rmin, factor=1, method='isothermal'):
+def J_LW_critical_density(Mass_halo, Mbh, z, rmin, factor=1, E_eV=12.5, method='isothermal'):
     """
     Toral specific intensity for 
     
@@ -747,7 +747,7 @@ def J_LW_critical_density(Mass_halo, Mbh, z, rmin, factor=1, method='isothermal'
     rho_vir = virial_density(z)*factor
     
     # Base J21 factor
-    J_base = J_LW_BH_density_factor(Mbh, rho_vir)
+    J_base = J_LW_BH_density_factor(Mbh, rho_vir, E_eV=E_eV)
     
     if method == 'isothermal':
         J_21 = J_base*(rvir*PARSEC_2_M)*(rvir/rmin-1)/J_CRIT_2_SI  # To transform to cgs
